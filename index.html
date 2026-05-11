@@ -3,140 +3,111 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Intro to Differentiation Lab</title>
+    <title>Interactive First Principles</title>
     <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            line-height: 1.6;
-            color: #333;
-            max-width: 800px;
-            margin: 40px auto;
-            padding: 20px;
-            background-color: #f4f7f6;
-        }
-        .card {
-            background: white;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        }
-        h1 { color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 10px; }
-        .formula-box {
-            background: #eef2f3;
-            padding: 15px;
-            border-left: 5px solid #3498db;
-            margin: 20px 0;
-            font-size: 1.2em;
-            text-align: center;
-        }
-        .interactive-section {
-            background: #fff;
-            border: 1px solid #ddd;
-            padding: 20px;
-            border-radius: 8px;
-            margin-top: 20px;
-        }
-        input {
-            padding: 10px;
-            width: 60px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            font-size: 1em;
-        }
-        button {
-            padding: 10px 20px;
-            background-color: #3498db;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 1em;
-        }
-        button:hover { background-color: #2980b9; }
-        #result {
-            margin-top: 20px;
-            font-weight: bold;
-            color: #27ae60;
-            font-size: 1.3em;
-        }
-        .step { color: #7f8c8d; font-size: 0.9em; margin-top: 5px; }
+        body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; background: #f4f7f6; color: #333; }
+        canvas { background: white; border: 1px solid #ccc; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); cursor: crosshair; }
+        .controls { margin: 20px; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); width: 80%; max-width: 600px; }
+        .math-box { font-size: 1.2rem; background: #eef; padding: 10px; border-left: 5px solid #5c67f2; margin-top: 10px; }
+        input[type=range] { width: 100%; }
+        label { font-weight: bold; }
+        .formula { color: #5c67f2; font-weight: bold; }
     </style>
 </head>
 <body>
 
-<div class="card">
-    <h1>The Power Rule Machine</h1>
-    <p>The <strong>Power Rule</strong> is the first "shortcut" you learn in calculus. It tells you how to find the derivative of any variable raised to a power.</p>
+    <h1>Differentiation from First Principles</h1>
+    <p>Function: <b>f(x) = x²</b></p>
 
-    <div class="formula-box">
-        If <strong>f(x) = ax<sup>n</sup></strong>, then <strong>f'(x) = (a &times; n)x<sup>n-1</sup></strong>
-    </div>
+    <canvas id="graph" width="600" height="400"></canvas>
 
-    <div class="interactive-section">
-        <h3>Try it yourself:</h3>
-        <p>Enter a coefficient (a) and an exponent (n) to see the derivative:</p>
+    <div class="controls">
+        <label for="hSlider">Change distance (h): </label>
+        <input type="range" id="hSlider" min="0.01" max="4" step="0.01" value="2">
         
-        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
-            <input type="number" id="coeff" value="3" title="Coefficient (a)">
-            <span>x</span>
-            <sup style="position: relative; top: -10px;">
-                <input type="number" id="exp" value="4" title="Exponent (n)">
-            </sup>
-            <button onclick="calculateDerivative()">Differentiate!</button>
+        <div class="math-box">
+            <p>Point A: (x, f(x)) = (2.0, 4.0)</p>
+            <p>Point B: (x+h, f(x+h)) = (<span id="xb"></span>, <span id="yb"></span>)</p>
+            <p class="formula">Slope (m) = [f(x+h) - f(x)] / h = <span id="slopeDisplay"></span></p>
         </div>
-
-        <div id="result"></div>
-        <div id="steps"></div>
+        <p><i>Notice: As <b>h</b> gets closer to 0, the slope approaches <b>4</b> (the derivative of x² at x=2).</i></p>
     </div>
-
-    <hr style="margin: 30px 0; border: 0; border-top: 1px solid #eee;">
-    
-    <h3>What just happened?</h3>
-    <ul>
-        <li><strong>Step 1:</strong> You took the original exponent (n) and multiplied it by the coefficient in front.</li>
-        <li><strong>Step 2:</strong> You subtracted 1 from the original exponent.</li>
-        <li><strong>The Result:</strong> That new expression represents the <em>slope</em> of the original function at any point.</li>
-    </ul>
-</div>
 
 <script>
-    function calculateDerivative() {
-        const a = parseFloat(document.getElementById('coeff').value);
-        const n = parseFloat(document.getElementById('exp').value);
+    const canvas = document.getElementById('graph');
+    const ctx = canvas.getContext('2d');
+    const hSlider = document.getElementById('hSlider');
+    const xbDisplay = document.getElementById('xb');
+    const ybDisplay = document.getElementById('yb');
+    const slopeDisplay = document.getElementById('slopeDisplay');
+
+    // Graph Settings
+    const scale = 40; 
+    const offsetX = 100; // Shift origin so we see more positive x
+    const offsetY = 350; // Shift origin down
+
+    // The Function f(x) = x^2
+    function f(x) { return x * x; }
+
+    function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
         
-        if (isNaN(a) || isNaN(n)) {
-            document.getElementById('result').innerHTML = "Please enter valid numbers!";
-            return;
+        // Draw Axes
+        ctx.beginPath();
+        ctx.strokeStyle = '#ddd';
+        ctx.moveTo(0, offsetY); ctx.lineTo(canvas.width, offsetY); // X axis
+        ctx.moveTo(offsetX, 0); ctx.lineTo(offsetX, canvas.height); // Y axis
+        ctx.stroke();
+
+        // Draw f(x) = x^2 curve
+        ctx.beginPath();
+        ctx.strokeStyle = '#333';
+        ctx.lineWidth = 2;
+        for (let i = 0; i < 10; i += 0.1) {
+            let px = offsetX + i * scale;
+            let py = offsetY - f(i) * scale;
+            if (i === 0) ctx.moveTo(px, py);
+            else ctx.lineTo(px, py);
         }
+        ctx.stroke();
 
-        // Rule: f'(x) = (a*n)x^(n-1)
-        const newCoeff = a * n;
-        const newExp = n - 1;
+        // Constants for First Principles
+        const x = 2;
+        const h = parseFloat(hSlider.value);
+        const x2 = x + h;
 
-        let resultText = `f'(x) = `;
+        // Point A (Fixed)
+        const ax = offsetX + x * scale;
+        const ay = offsetY - f(x) * scale;
         
-        if (newCoeff === 0) {
-            resultText += `0`;
-        } else {
-            // Handle coefficient formatting
-            resultText += newCoeff;
-            
-            // Handle exponent formatting
-            if (newExp === 1) {
-                resultText += `x`;
-            } else if (newExp === 0) {
-                // x^0 is 1, so we just keep the coefficient
-            } else {
-                resultText += `x<sup>${newExp}</sup>`;
-            }
-        }
+        // Point B (Moving with h)
+        const bx = offsetX + x2 * scale;
+        const by = offsetY - f(x2) * scale;
 
-        document.getElementById('result').innerHTML = resultText;
-        document.getElementById('steps').innerHTML = `
-            <div class="step">Calculation: (${a} &times; ${n})x<sup>${n}-1</sup></div>
-        `;
+        // Draw Secant Line (The "First Principles" line)
+        ctx.beginPath();
+        ctx.strokeStyle = '#ff4757';
+        ctx.lineWidth = 2;
+        // Extend line for visual clarity
+        let m = (f(x2) - f(x)) / h;
+        ctx.moveTo(ax - 50, ay + (50 * m));
+        ctx.lineTo(bx + 100, by - (100 * m));
+        ctx.stroke();
+
+        // Draw Points A and B
+        ctx.fillStyle = '#5c67f2';
+        ctx.beginPath(); ctx.arc(ax, ay, 5, 0, Math.PI * 2); ctx.fill(); // Point A
+        ctx.fillStyle = '#ff4757';
+        ctx.beginPath(); ctx.arc(bx, by, 5, 0, Math.PI * 2); ctx.fill(); // Point B
+
+        // Update Math Displays
+        xbDisplay.innerText = x2.toFixed(2);
+        ybDisplay.innerText = f(x2).toFixed(2);
+        slopeDisplay.innerText = m.toFixed(4);
     }
-</script>
 
+    hSlider.addEventListener('input', draw);
+    draw(); // Initial draw
+</script>
 </body>
 </html>
