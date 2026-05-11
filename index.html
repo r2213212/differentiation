@@ -3,67 +3,136 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Interactive First Principles</title>
+    <title>The First Principles Lab</title>
     <style>
-        body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; background: #f4f7f6; color: #333; }
-        canvas { background: white; border: 1px solid #ccc; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); cursor: crosshair; }
-        .controls { margin: 20px; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); width: 80%; max-width: 600px; }
-        .math-box { font-size: 1.2rem; background: #eef; padding: 10px; border-left: 5px solid #5c67f2; margin-top: 10px; }
-        input[type=range] { width: 100%; }
-        label { font-weight: bold; }
-        .formula { color: #5c67f2; font-weight: bold; }
+        :root { --primary: #5c67f2; --secondary: #ff4757; --bg: #f8f9fa; --text: #2d3436; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: var(--text); background: var(--bg); margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+        .container { max-width: 900px; width: 100%; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        
+        /* Graph Styles */
+        canvas { background: #fff; border: 2px solid #eee; border-radius: 10px; display: block; margin: 20px auto; }
+        .controls { background: #f1f2f6; padding: 20px; border-radius: 10px; margin-bottom: 30px; }
+        input[type=range] { width: 100%; cursor: pointer; }
+        
+        /* Theory Styles */
+        .theory-section { border-top: 2px solid #eee; padding-top: 20px; }
+        h2 { color: var(--primary); border-bottom: 2px solid var(--primary); display: inline-block; }
+        .formula-card { background: var(--primary); color: white; padding: 15px; border-radius: 8px; text-align: center; font-size: 1.4rem; margin: 15px 0; }
+        table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background: #f9f9f9; }
+        .highlight { color: var(--secondary); font-weight: bold; }
+        .step-num { background: var(--primary); color: white; border-radius: 50%; width: 25px; height: 25px; display: inline-block; text-align: center; line-height: 25px; margin-right: 10px; font-size: 0.9rem; }
     </style>
 </head>
 <body>
 
-    <h1>Differentiation from First Principles</h1>
-    <p>Function: <b>f(x) = x²</b></p>
+<div class="container">
+    <h1>Calculus: First Principles Lab</h1>
+    <p>Move the slider to see the <b>Secant Line</b> (red) turn into the <b>Tangent Line</b> (slope at a point).</p>
 
-    <canvas id="graph" width="600" height="400"></canvas>
+    <canvas id="graph" width="700" height="400"></canvas>
 
     <div class="controls">
-        <label for="hSlider">Change distance (h): </label>
+        <label><b>Adjust h (Distance between points):</b> <span id="hVal" class="highlight">2.00</span></label>
         <input type="range" id="hSlider" min="0.01" max="4" step="0.01" value="2">
         
-        <div class="math-box">
-            <p>Point A: (x, f(x)) = (2.0, 4.0)</p>
-            <p>Point B: (x+h, f(x+h)) = (<span id="xb"></span>, <span id="yb"></span>)</p>
-            <p class="formula">Slope (m) = [f(x+h) - f(x)] / h = <span id="slopeDisplay"></span></p>
+        <div style="margin-top:15px; display: flex; gap: 20px;">
+            <div><b>Point A (x):</b> 2.00</div>
+            <div><b>Point B (x+h):</b> <span id="xb" class="highlight">4.00</span></div>
+            <div><b>Current Slope:</b> <span id="slopeDisplay" class="highlight">4.00</span></div>
         </div>
-        <p><i>Notice: As <b>h</b> gets closer to 0, the slope approaches <b>4</b> (the derivative of x² at x=2).</i></p>
     </div>
+
+    <div class="theory-section">
+        <h2>1. The Definition</h2>
+        <p>Differentiation is finding the <b>instantaneous rate of change</b>. Since we can't divide by zero to find the slope at one point, we use a limit:</p>
+        <div class="formula-card">
+            f'(x) = lim<sub>h → 0</sub> [ f(x + h) - f(x) ] / h
+        </div>
+
+        <h2>2. The Four-Step Method</h2>
+        <p>This is how the math works for <b>f(x) = x²</b> (the curve shown above):</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Step</th>
+                    <th>Logic</th>
+                    <th>Result</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><span class="step-num">1</span> <b>Setup</b></td>
+                    <td>Find f(x + h)</td>
+                    <td>(x + h)² = x² + 2xh + h²</td>
+                </tr>
+                <tr>
+                    <td><span class="step-num">2</span> <b>Difference</b></td>
+                    <td>Subtract f(x)</td>
+                    <td>(x² + 2xh + h²) - x² = 2xh + h²</td>
+                </tr>
+                <tr>
+                    <td><span class="step-num">3</span> <b>Divide</b></td>
+                    <td>Divide by h</td>
+                    <td>(2xh + h²) / h = <b>2x + h</b></td>
+                </tr>
+                <tr>
+                    <td><span class="step-num">4</span> <b>Limit</b></td>
+                    <td>Let h → 0</td>
+                    <td>2x + 0 = <span class="highlight">2x</span></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h2>3. What are you seeing?</h2>
+        <ul>
+            <li><b>The Red Line:</b> This is the "Secant." It represents the average slope between two points.</li>
+            <li><b>The Shrinking h:</b> As you slide <i>h</i> toward 0, the two points become one.</li>
+            <li><b>The Derivative:</b> When <i>h</i> is tiny, the slope is exactly <b>2x</b>. Since our point is at x=2, the slope becomes <b>4</b>.</li>
+        </ul>
+    </div>
+</div>
 
 <script>
     const canvas = document.getElementById('graph');
     const ctx = canvas.getContext('2d');
     const hSlider = document.getElementById('hSlider');
+    const hVal = document.getElementById('hVal');
     const xbDisplay = document.getElementById('xb');
-    const ybDisplay = document.getElementById('yb');
     const slopeDisplay = document.getElementById('slopeDisplay');
 
-    // Graph Settings
-    const scale = 40; 
-    const offsetX = 100; // Shift origin so we see more positive x
-    const offsetY = 350; // Shift origin down
+    const scale = 50; 
+    const offsetX = 100; 
+    const offsetY = 350; 
 
-    // The Function f(x) = x^2
     function f(x) { return x * x; }
 
     function draw() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         
+        // Draw Grid
+        ctx.strokeStyle = '#f0f0f0';
+        for(let i=0; i<canvas.width; i+=scale) {
+            ctx.beginPath(); ctx.moveTo(i,0); ctx.lineTo(i,canvas.height); ctx.stroke();
+        }
+        for(let i=0; i<canvas.height; i+=scale) {
+            ctx.beginPath(); ctx.moveTo(0,i); ctx.lineTo(canvas.width,i); ctx.stroke();
+        }
+
         // Draw Axes
         ctx.beginPath();
-        ctx.strokeStyle = '#ddd';
-        ctx.moveTo(0, offsetY); ctx.lineTo(canvas.width, offsetY); // X axis
-        ctx.moveTo(offsetX, 0); ctx.lineTo(offsetX, canvas.height); // Y axis
+        ctx.strokeStyle = '#ccc';
+        ctx.lineWidth = 2;
+        ctx.moveTo(0, offsetY); ctx.lineTo(canvas.width, offsetY);
+        ctx.moveTo(offsetX, 0); ctx.lineTo(offsetX, canvas.height);
         ctx.stroke();
 
-        // Draw f(x) = x^2 curve
+        // Draw x^2 curve
         ctx.beginPath();
-        ctx.strokeStyle = '#333';
-        ctx.lineWidth = 2;
-        for (let i = 0; i < 10; i += 0.1) {
+        ctx.strokeStyle = '#5c67f2';
+        ctx.lineWidth = 3;
+        for (let i = 0; i < 5; i += 0.1) {
             let px = offsetX + i * scale;
             let py = offsetY - f(i) * scale;
             if (i === 0) ctx.moveTo(px, py);
@@ -71,43 +140,45 @@
         }
         ctx.stroke();
 
-        // Constants for First Principles
         const x = 2;
         const h = parseFloat(hSlider.value);
         const x2 = x + h;
 
-        // Point A (Fixed)
         const ax = offsetX + x * scale;
         const ay = offsetY - f(x) * scale;
-        
-        // Point B (Moving with h)
         const bx = offsetX + x2 * scale;
         const by = offsetY - f(x2) * scale;
 
-        // Draw Secant Line (The "First Principles" line)
+        // Draw Secant Line
+        let m = (f(x2) - f(x)) / h;
         ctx.beginPath();
         ctx.strokeStyle = '#ff4757';
-        ctx.lineWidth = 2;
-        // Extend line for visual clarity
-        let m = (f(x2) - f(x)) / h;
-        ctx.moveTo(ax - 50, ay + (50 * m));
+        ctx.setLineDash([5, 5]);
+        ctx.moveTo(ax - 100, ay + (100 * m));
         ctx.lineTo(bx + 100, by - (100 * m));
         ctx.stroke();
+        ctx.setLineDash([]);
 
-        // Draw Points A and B
+        // Points
         ctx.fillStyle = '#5c67f2';
-        ctx.beginPath(); ctx.arc(ax, ay, 5, 0, Math.PI * 2); ctx.fill(); // Point A
+        ctx.beginPath(); ctx.arc(ax, ay, 6, 0, Math.PI*2); ctx.fill();
         ctx.fillStyle = '#ff4757';
-        ctx.beginPath(); ctx.arc(bx, by, 5, 0, Math.PI * 2); ctx.fill(); // Point B
+        ctx.beginPath(); ctx.arc(bx, by, 6, 0, Math.PI*2); ctx.fill();
 
-        // Update Math Displays
+        // Labels
+        ctx.fillStyle = "#2d3436";
+        ctx.fillText("A (fixed)", ax + 10, ay);
+        ctx.fillText("B (moving)", bx + 10, by - 10);
+
+        // Update UI
+        hVal.innerText = h.toFixed(2);
         xbDisplay.innerText = x2.toFixed(2);
-        ybDisplay.innerText = f(x2).toFixed(2);
-        slopeDisplay.innerText = m.toFixed(4);
+        slopeDisplay.innerText = m.toFixed(3);
     }
 
     hSlider.addEventListener('input', draw);
-    draw(); // Initial draw
+    draw();
 </script>
+
 </body>
 </html>
