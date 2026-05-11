@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Intro to Differentiation Lab</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+            background-color: #f4f7f6;
+        }
+        .card {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        h1 { color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 10px; }
+        .formula-box {
+            background: #eef2f3;
+            padding: 15px;
+            border-left: 5px solid #3498db;
+            margin: 20px 0;
+            font-size: 1.2em;
+            text-align: center;
+        }
+        .interactive-section {
+            background: #fff;
+            border: 1px solid #ddd;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        input {
+            padding: 10px;
+            width: 60px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 1em;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1em;
+        }
+        button:hover { background-color: #2980b9; }
+        #result {
+            margin-top: 20px;
+            font-weight: bold;
+            color: #27ae60;
+            font-size: 1.3em;
+        }
+        .step { color: #7f8c8d; font-size: 0.9em; margin-top: 5px; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h1>The Power Rule Machine</h1>
+    <p>The <strong>Power Rule</strong> is the first "shortcut" you learn in calculus. It tells you how to find the derivative of any variable raised to a power.</p>
+
+    <div class="formula-box">
+        If <strong>f(x) = ax<sup>n</sup></strong>, then <strong>f'(x) = (a &times; n)x<sup>n-1</sup></strong>
+    </div>
+
+    <div class="interactive-section">
+        <h3>Try it yourself:</h3>
+        <p>Enter a coefficient (a) and an exponent (n) to see the derivative:</p>
+        
+        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+            <input type="number" id="coeff" value="3" title="Coefficient (a)">
+            <span>x</span>
+            <sup style="position: relative; top: -10px;">
+                <input type="number" id="exp" value="4" title="Exponent (n)">
+            </sup>
+            <button onclick="calculateDerivative()">Differentiate!</button>
+        </div>
+
+        <div id="result"></div>
+        <div id="steps"></div>
+    </div>
+
+    <hr style="margin: 30px 0; border: 0; border-top: 1px solid #eee;">
+    
+    <h3>What just happened?</h3>
+    <ul>
+        <li><strong>Step 1:</strong> You took the original exponent (n) and multiplied it by the coefficient in front.</li>
+        <li><strong>Step 2:</strong> You subtracted 1 from the original exponent.</li>
+        <li><strong>The Result:</strong> That new expression represents the <em>slope</em> of the original function at any point.</li>
+    </ul>
+</div>
+
+<script>
+    function calculateDerivative() {
+        const a = parseFloat(document.getElementById('coeff').value);
+        const n = parseFloat(document.getElementById('exp').value);
+        
+        if (isNaN(a) || isNaN(n)) {
+            document.getElementById('result').innerHTML = "Please enter valid numbers!";
+            return;
+        }
+
+        // Rule: f'(x) = (a*n)x^(n-1)
+        const newCoeff = a * n;
+        const newExp = n - 1;
+
+        let resultText = `f'(x) = `;
+        
+        if (newCoeff === 0) {
+            resultText += `0`;
+        } else {
+            // Handle coefficient formatting
+            resultText += newCoeff;
+            
+            // Handle exponent formatting
+            if (newExp === 1) {
+                resultText += `x`;
+            } else if (newExp === 0) {
+                // x^0 is 1, so we just keep the coefficient
+            } else {
+                resultText += `x<sup>${newExp}</sup>`;
+            }
+        }
+
+        document.getElementById('result').innerHTML = resultText;
+        document.getElementById('steps').innerHTML = `
+            <div class="step">Calculation: (${a} &times; ${n})x<sup>${n}-1</sup></div>
+        `;
+    }
+</script>
+
+</body>
+</html>
